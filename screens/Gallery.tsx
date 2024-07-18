@@ -21,6 +21,7 @@ const Gallery = () => {
                 const albumAssets = await MediaLibrary.getAssetsAsync({ album });
                 setImgs(albumAssets.assets);
             }
+            console.log(imgs);
         }
     }
 

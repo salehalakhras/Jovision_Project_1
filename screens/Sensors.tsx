@@ -29,7 +29,8 @@ const Sensors = () => {
             requestPermission();
 
         const loc = await Location.getCurrentPositionAsync();
-        setLocation(loc);
+        if(loc)
+            setLocation(loc);
     }
 
     useEffect(() => {
