@@ -1,28 +1,20 @@
 import React, { useState } from 'react';
 import { StyleSheet, FlatList, RefreshControl, Image, Text, Dimensions, View } from 'react-native';
-import * as MediaLibrary from 'expo-media-library';
+import { ReadDirItem } from 'react-native-fs';
+import { Video } from 'expo-av';
+var RNFS = require('react-native-fs');
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
 const Gallery = () => {
-    const [mediaPermission, requestMediaPermission] = MediaLibrary.usePermissions();
-    const [imgs, setImgs] = useState<MediaLibrary.Asset[]>([]);
+    const [imgs, setImgs] = useState<ReadDirItem[]>([]);
     const [refreshing, setRefreshing] = useState(false);
     const [emptyText, setEmptyText] = useState('Refresh to load images.');
 
     const getImages = async () => {
-        if (mediaPermission?.status != 'granted')
-            await requestMediaPermission();
-
-        if (mediaPermission?.status == 'granted') {
-            const album = await MediaLibrary.getAlbumAsync('Jovision');
-            if (album) {
-                const albumAssets = await MediaLibrary.getAssetsAsync({ album });
-                setImgs(albumAssets.assets);
-            }
-            console.log(imgs);
-        }
+        const assets = await RNFS.readDir(RNFS.DocumentDirectoryPath+'/Jovision/');
+        setImgs(assets);
     }
 
     const onRefresh = () => {
@@ -31,7 +23,7 @@ const Gallery = () => {
         setEmptyText('There are no images taken by this app yet.');
         setTimeout(() => {
           setRefreshing(false);
-        }, 1500); // Refresh indicator will be visible for at least 1 second
+        }, 1500); // Refresh indicator will be visible for at least 1.5 second
       };
 
     return (
@@ -39,8 +31,8 @@ const Gallery = () => {
             <FlatList
             numColumns={2}
             data={imgs}
-            renderItem={({item}) => <Image source={{uri: item.uri}} style={styles.img} ></Image>}
-            keyExtractor={item => item.uri}
+            renderItem={({item}) => item.name.endsWith('g')? (<Image source={{uri: 'file:///'+item.path}} style={styles.img} ></Image>) : (<Video style={styles.img} source={{uri: 'file:///'+item.path}}></Video>)}
+            keyExtractor={item => item.path}
             refreshControl={
                 <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
               }

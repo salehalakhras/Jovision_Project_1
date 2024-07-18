@@ -1,7 +1,6 @@
 import { Text, View, StyleSheet, Button, TouchableOpacity, Image, Dimensions } from "react-native";
 import { CameraMode, CameraType, CameraView, useCameraPermissions, useMicrophonePermissions } from 'expo-camera';
 import React, { useState } from "react";
-import * as MediaLibrary from 'expo-media-library';
 
 var RNFS = require('react-native-fs');
 
@@ -15,7 +14,6 @@ const Camera = () => {
   const [cameraRef, setCameraRef] = useState<CameraView>();
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
   const [audioPermission, requestAudioPermission] = useMicrophonePermissions();
-  const [mediaPermission, requestMediaPermission] = MediaLibrary.usePermissions();
   const [previewImg, setPreviewImg] = useState(false);
   const [cameraMode, setCameraMode] = useState<CameraMode>('picture');
   const [video, setVideo] = useState<string>();
@@ -42,18 +40,7 @@ const Camera = () => {
   }
 
   const saveAsset = async (uri: string) => {
-    // await requestMediaPermission();
-    await RNFS.moveFile(uri,RNFS.DocumentDirectoryPath+'/Jov');
-    console.log(uri,RNFS.DocumentDirectoryPath);
-    // if (mediaPermission?.status == 'granted') {
-    //   var album = await MediaLibrary.getAlbumAsync('Jovision');
-    //   if (!album) {
-    //     album = await MediaLibrary.createAlbumAsync('Jovision', image, false);
-    //   }
-    //   else {
-    //     const added = await MediaLibrary.addAssetsToAlbumAsync(image, album, false);
-    //   }
-    // }
+    await RNFS.moveFile(uri,RNFS.DocumentDirectoryPath +`/Jovision/Saleh-Alakhras-${new Date()}.${cameraMode == 'picture'? 'jpg' : 'mp4'}`);
   }
 
   const recordVideo = async () => {
@@ -65,7 +52,7 @@ const Camera = () => {
     setRecording(false);  
     cameraRef?.stopRecording();
   }
-
+  RNFS.mkdir(RNFS.DocumentDirectoryPath+'/Jovision');
   return (
     <View style={styles.container}>
       <CameraView style={styles.camera} facing={cameraFace} ref={ref => setCameraRef(ref!)} mode={cameraMode}>
@@ -76,7 +63,7 @@ const Camera = () => {
           <TouchableOpacity style={styles.button} onPress={() => { cameraFace == 'back' ? setCameraFace('front') : setCameraFace('back') }}>
             <Text style={styles.text}>Switch to {cameraFace == 'back' ? 'front' : 'back'}</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.button} onPress={() => { cameraMode == 'picture' ? setCameraMode('video') : setCameraMode('picture') }}>
+          <TouchableOpacity style={styles.button} onPress={() => {stopRecording(); cameraMode == 'picture' ? setCameraMode('video') : setCameraMode('picture')  }}>
             <Text style={styles.text}>Switch to {cameraMode == 'picture' ? 'video' : 'picture'}</Text>
           </TouchableOpacity>
         </View>

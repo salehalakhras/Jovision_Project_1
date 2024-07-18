@@ -1,28 +1,20 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { FlatList, StyleSheet, Text, Image, Dimensions, View, TouchableOpacity } from 'react-native';
-import * as MediaLibrary from 'expo-media-library';
-
+import { ReadDirItem } from 'react-native-fs';
+var RNFS = require('react-native-fs');
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 const SlideShow = () => {
-    const [mediaPermission, requestMediaPermission] = MediaLibrary.usePermissions();
-    const [imgs, setImgs] = useState<MediaLibrary.Asset[]>([]);
+    const [imgs, setImgs] = useState<ReadDirItem[]>([]);
     const [slideScroll, setSlideScroll] = useState(true);
-    const listRef = useRef<FlatList<MediaLibrary.Asset>>(null);
+    const listRef = useRef<FlatList<ReadDirItem>>(null);
     const [scrollIndex, setScrollIndex] = useState<number>(0);
 
     const getImages = async () => {
-        const permi = await requestMediaPermission();
-        if (permi.granted) {
-            const album = await MediaLibrary.getAlbumAsync('Jovision');
-            if (album) {
-                const albumAssets = await MediaLibrary.getAssetsAsync({ album });
-                setImgs(albumAssets.assets);
-            }
-        }
-
-    };
+        const assets = await RNFS.readDir(RNFS.DocumentDirectoryPath+'/Jovision/');
+        setImgs(assets);
+    }
 
 
     useEffect(() => {
@@ -43,8 +35,8 @@ const SlideShow = () => {
         <View>
             <FlatList
                 data={imgs}
-                renderItem={({ item }) => <Image source={{ uri: item.uri }} style={styles.img} ></Image>}
-                keyExtractor={item => item.uri}
+                renderItem={({ item }) => <Image source={{ uri: 'file:///'+item.path }} style={styles.img} ></Image>}
+                keyExtractor={item => item.path}
                 ListEmptyComponent={<Text style={styles.text}>No images to show</Text>}
                 horizontal={true}
                 scrollEnabled={false}
