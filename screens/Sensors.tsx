@@ -1,31 +1,31 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, Button } from 'react-native';
+import { StyleSheet, View, Text, Button, Image } from 'react-native';
 import * as Location from 'expo-location';
 import { DeviceMotion, DeviceMotionMeasurement } from 'expo-sensors';
 import { Subscription } from 'expo-media-library';
+import { TabBarIcon } from '../components/navigation/TabBarIcon';
 
 enum Oreintation {
-    Portrait = 'Portrait',
-    LeftLandscape = 'Left Landscape',
-    RightLandscape = 'Right Landscape',
-    UpsideDown = 'Upside Down'
+    Portrait = 'https://i.postimg.cc/YCh7vxFM/portrait.png',
+    LeftLandscape = 'https://i.postimg.cc/pX0xVSps/left-Landscape.png',
+    RightLandscape = 'https://i.postimg.cc/XYmbdyKF/right-Landscape.png',
+    UpsideDown = 'https://i.postimg.cc/7LzyVYXR/upside-Down.png',
+    Undefined = ''
 }
 const Sensors = () => {
     const [location, setLocation] = useState<Location.LocationObject>();
     const [permission, requestPermission] = Location.useForegroundPermissions();
-    const [motionData, setMotionData] = useState<DeviceMotionMeasurement>();
+    const [motionData, setMotionData] = useState<DeviceMotionMeasurement['rotation']>();
     const [subscription, setSubscription] = useState<Subscription | null>();
-    const [oreintation, setOrientation] = useState<Oreintation>()
+    const [oreintation, setOrientation] = useState<string>()
 
     DeviceMotion.setUpdateInterval(500);
 
     const _subscribe = () => {
         setSubscription(
             DeviceMotion.addListener(deviceMotion => {
-                if (deviceMotion.rotation) {
-                    setMotionData(deviceMotion);
-                    setOrientation(getOrientation(motionData));
-                }
+                setMotionData(deviceMotion.rotation);
+                setOrientation(getOrientation(deviceMotion.rotation));
             })
         );
     };
@@ -44,29 +44,42 @@ const Sensors = () => {
             setLocation(loc);
     }
 
-    const getOrientation = (motionData): Oreintation => {
-        let x = motionData.rotation.beta * 57.2958;
-        let y = motionData.rotation.gamma * 57.2958;
-        let z = motionData.rotation.alpha * 57.2958;
+    const getOrientation = (motionData: DeviceMotionMeasurement['rotation']): string => {
+        if (motionData) {
+            let x = motionData.beta * 57.2958;
+            let y = motionData.gamma * 57.2958;
+            let z = motionData.alpha * 57.2958;
 
-        if (x > 45 && x < 135) {
-            return Oreintation.Portrait;
+
+            if (x > 45 && x < 135) {
+                return Oreintation.Portrait;
+            }
+            else if (y > 45 && y < 135)
+                return Oreintation.LeftLandscape;
+            else if (x > -135 && x < -45)
+                return Oreintation.UpsideDown;
+            else return Oreintation.RightLandscape;
         }
-        else if (y > 45 && y < 135)
-            return Oreintation.LeftLandscape;
-        else if (x > -135 && x < -45)
-            return Oreintation.UpsideDown;
-        else return Oreintation.RightLandscape;
+
+        return Oreintation.Undefined;
 
     }
 
+    const getSpeedIcon = (speed: number): string => {
+        if (speed > 10)
+            return 'model-s';
+        else if (speed > 2)
+            return 'walk';
+        else
+            return 'body'
+    }
+
     useEffect(() => {
-        if (!location)
-            getLocation();
+        _subscribe();
+        getLocation();
 
         const interval = setInterval(getLocation, 10000)
 
-        setTimeout(_subscribe, 2000);
         return () => {
             clearInterval(interval);
             _unsubscribe();
@@ -90,11 +103,12 @@ const Sensors = () => {
             <Text style={styles.text}>Latitude: {(location?.coords.latitude)?.toPrecision(4)}</Text>
             <Text style={styles.text}>Altitude: {(location?.coords.altitude)?.toPrecision(4)}</Text>
             <Text style={styles.text}>Speed: {location?.coords.speed}</Text>
+            <TabBarIcon name={getSpeedIcon(location?.coords.speed)} size={50} color={'blue'} style={{ alignSelf: 'center' }}></TabBarIcon>
             <Text style={styles.text}>---Oreintation:---</Text>
-            {motionData?.rotation ? (<><Text style={styles.text}>X: {(motionData?.rotation.beta * 57.2958).toPrecision(4)}°</Text>
-                <Text style={styles.text}>Y: {(motionData?.rotation.gamma * 57.2958).toPrecision(4)}°</Text>
-                <Text style={styles.text}>Z: {(motionData?.rotation.alpha * 57.2958).toPrecision(4)}°</Text>
-                <Text style={styles.text}>{oreintation}</Text></>) : null}
+            <Text style={styles.text}>X: {((motionData?.beta) ? motionData?.beta * 57.2958 : 0).toPrecision(4)}°</Text>
+            <Text style={styles.text}>Y: {((motionData?.gamma) ? motionData.gamma * 57.2958 : 0).toPrecision(4)}°</Text>
+            <Text style={styles.text}>Z: {((motionData?.alpha) ? motionData.alpha * 57.2958 : 0).toPrecision(4)}°</Text>
+            <Image src={oreintation} style={styles.img}></Image>
         </View>
     );
 }
@@ -109,7 +123,14 @@ const styles = StyleSheet.create({
     text: {
         fontSize: 20,
         fontWeight: 'bold',
-        color: 'black'
+        color: 'black',
+        alignSelf: 'center'
+    },
+    img:{
+        width:150,
+        height: 150,
+        alignSelf:'center',
+        resizeMode:'contain'
     }
 })
 

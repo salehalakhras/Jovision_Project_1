@@ -23,7 +23,7 @@ const Gallery = () => {
         setEmptyText('There are no images taken by this app yet.');
         setTimeout(() => {
           setRefreshing(false);
-        }, 1500); // Refresh indicator will be visible for at least 1.5 second
+        }, 1500);
       };
 
     return (

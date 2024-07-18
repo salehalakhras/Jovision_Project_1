@@ -18,18 +18,17 @@ const SlideShow = () => {
 
 
     useEffect(() => {
-        if (imgs.length == 0) {
-            getImages();
-        }
+        getImages();
         let scrollInterval;
         if (slideScroll && imgs.length != 0) {
             scrollInterval = setInterval(() => {
                 listRef.current?.scrollToIndex({ animated: true, index: scrollIndex });
-                setScrollIndex((scrollIndex + 1) % imgs.length);
+                setScrollIndex((prev) => (prev + 1) % imgs.length);
             }, 1000);
         }
-        return () => clearInterval(scrollInterval!);
-    }, [scrollIndex, slideScroll, imgs])
+        return () => {
+            clearInterval(scrollInterval!)};
+    }, [slideScroll,scrollIndex,imgs.length])
 
     return (
         <View>
