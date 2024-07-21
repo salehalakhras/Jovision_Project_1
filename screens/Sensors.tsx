@@ -88,6 +88,7 @@ const Sensors = () => {
 
 
 
+
     if (!permission?.granted) {
         return (
             <View style={styles.container}>
@@ -108,7 +109,7 @@ const Sensors = () => {
             <Text style={styles.text}>X: {((motionData?.beta) ? motionData?.beta * 57.2958 : 0).toPrecision(4)}°</Text>
             <Text style={styles.text}>Y: {((motionData?.gamma) ? motionData.gamma * 57.2958 : 0).toPrecision(4)}°</Text>
             <Text style={styles.text}>Z: {((motionData?.alpha) ? motionData.alpha * 57.2958 : 0).toPrecision(4)}°</Text>
-            <Image src={oreintation} style={styles.img}></Image>
+            {oreintation? <Image src={oreintation} style={styles.img}></Image> : null}
         </View>
     );
 }

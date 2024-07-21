@@ -40,7 +40,7 @@ const Camera = () => {
   }
 
   const saveAsset = async (uri: string) => {
-    await RNFS.moveFile(uri,RNFS.DocumentDirectoryPath +`/Jovision/Saleh-Alakhras-${new Date()}.${cameraMode == 'picture'? 'jpg' : 'mp4'}`);
+    await RNFS.moveFile(uri,RNFS.DocumentDirectoryPath +`/Jovision/Saleh-Alakhras-${(new Date()).toString().replaceAll(':','-')}.${cameraMode == 'picture'? 'jpg' : 'mp4'}`);
   }
 
   const recordVideo = async () => {
